@@ -1,7 +1,6 @@
 -- PRIVILEGES FOR pats USER OF PATS DATABASE
 --
--- by (student_1) & (student_2)
---
+-- by Matthew Nielsen & Theophilus Onime
 --
 -- SQL needed to create the pats user
 

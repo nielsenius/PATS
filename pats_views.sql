@@ -1,5 +1,5 @@
 -- VIEWS FOR PATS DATABASE
 --
--- by (student_1) & (student_2)
+-- by Matthew Nielsen & Theophilus Onime
 --
 --
