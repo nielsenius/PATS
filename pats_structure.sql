@@ -64,7 +64,7 @@ CREATE TABLE animal_medicines (
     id SERIAL PRIMARY KEY, -- PK
     animal_id integer NOT NULL, -- FK
     medicine_id integer NOT NULL, -- FK
-    recommended_num_of_units integer NOT NULL
+    recommended_num_of_units integer
 );
 
 CREATE TABLE visit_medicines (
