@@ -15,13 +15,18 @@
 
 
 
--- set_end_date_for_medicine_costs
--- (associated with a trigger: set_end_date_for_previous_medicine_cost)
 
---trigger first
+
 --we need triggers to automatically set the end_date of either procedure_costs or 
 --medicine_costs to the current date before a new record is added.
+CREATE TRIGGER increment_created_count
+AFTER INSERT ON medicine_costs
+EXECUTE PROCEDURE set_end_date_for_previous_medicine_cost();
+
+-- set_end_date_for_medicine_costs
+-- (associated with a trigger: set_end_date_for_previous_medicine_cost)
 CREATE FUNCTION set_end_date_for_previous_medicine_cost() RETURNS TRIGGER AS $$
+	--
 	DECLARE
 		--today's date (current_date)
 		new_mc_end_date DATE;
@@ -31,21 +36,16 @@ CREATE FUNCTION set_end_date_for_previous_medicine_cost() RETURNS TRIGGER AS $$
 	BEGIN
 		--find the medicine cost table itself which will soon become obsolete
 		--is the name of the table "medicine_costs"?
-		prev_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'medicine_id')
-		get_mc_id = (SELECT medicine_id FROM medicine_costs WHERE medicine_id = prev_mc_id)
+		--get the CURRENT currval
+		prev_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'medicine_id')));
+		--hold onto this currval for future use
+		get_mc_id = (SELECT medicine_id FROM medicine_costs WHERE medicine_id = prev_mc_id);
 		--update medicine_costs end_date to be today
 		UPDATE medicine_costs SET end_date = (current_date) WHERE medicine_id = get_mc_id;
 	  RETURN NULL;
 	END;
 	$$ LANGUAGE plpgsql;
 	-- used $$ as delimiters b/c needed '' inside sequence eval
-
--- Step 2: call that trigger function whenever a new task is inserted
-CREATE TRIGGER increment_created_count
-AFTER INSERT ON medicine_costs
-EXECUTE PROCEDURE set_end_date_for_previous_medicine_cost();
-
-
 
 
 -- set_end_date_for_procedure_costs
