@@ -22,7 +22,7 @@ EXECUTE PROCEDURE set_end_date_for_previous_medicine_cost();
 
 -- set_end_date_for_medicine_costs
 -- (associated with a trigger: set_end_date_for_previous_medicine_cost)
-CREATE FUNCTION set_end_date_for_previous_medicine_cost() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION set_end_date_for_previous_medicine_cost() RETURNS TRIGGER AS $$
 	--
 	DECLARE
 		--today's date (current_date)
@@ -55,7 +55,7 @@ EXECUTE PROCEDURE set_end_date_for_previous_procedure_cost();
 
 -- set_end_date_for_procedure_costs
 -- (associated with a trigger: set_end_date_for_previous_procedure_cost)
-CREATE FUNCTION set_end_date_for_previous_procedure_cost() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION set_end_date_for_previous_procedure_cost() RETURNS TRIGGER AS $$
 	--
 	DECLARE
 		--today's date (current_date)
@@ -88,8 +88,14 @@ CREATE FUNCTION set_end_date_for_previous_procedure_cost() RETURNS TRIGGER AS $$
 -- verify_that_medicine_requested_in_stock
 -- (takes medicine_id and units_needed as arguments and returns a boolean)
 
-
-
+CREATE OR REPLACE FUNCTION verify_that_medicine_requested_in_stock(medicine_id int, units_needed int) RETURNS boolean AS $$
+    DECLARE
+        units_in_stock int;
+    BEGIN
+        units_in_stock = (SELECT stock_amount FROM medicines WHERE id = medicine_id);
+        RETURN units_in_stock - units_needed >= 0;
+    END;
+$$ LANGUAGE plpgsql;
 
 -- verify_that_medicine_is_appropriate_for_pet
 -- (takes medicine_id and pet_id as arguments and returns a boolean)
