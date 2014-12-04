@@ -49,7 +49,7 @@ CREATE TABLE medicines (
     stock_amount integer,
     method varchar,
     unit varchar,
-    vaccine boolean
+    vaccine boolean DEFAULT false
 );
 
 CREATE TABLE medicine_costs (
@@ -72,7 +72,7 @@ CREATE TABLE visit_medicines (
     visit_id integer, -- FK
     medicine_id integer, -- FK
     units_given integer,
-    discount real DEFAULT 0
+    discount real DEFAULT 0.00
 );
 
 CREATE TABLE procedures (
@@ -88,7 +88,7 @@ CREATE TABLE treatments (
     visit_id integer, -- FK
     procedure_id integer, -- FK
     successful boolean,
-    discount real DEFAULT 0
+    discount real DEFAULT 0.00
 );
 
 CREATE TABLE procedure_costs (
