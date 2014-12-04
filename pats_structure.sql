@@ -6,31 +6,31 @@
 
 CREATE TABLE owners (
     id SERIAL PRIMARY KEY, -- PK
-    first_name varchar NOT NULL,
-    last_name varchar NOT NULL,
+    first_name varchar,
+    last_name varchar,
     street varchar,
     city varchar,
     state varchar,
     zip varchar,
-    phone varchar NOT NULL,
+    phone varchar,
     email varchar,
     active boolean DEFAULT true
 );
 
 CREATE TABLE pets (
     id SERIAL PRIMARY KEY, -- PK
-    name varchar NOT NULL,
-    animal_id integer NOT NULL, -- FK
-    owner_id integer NOT NULL, -- FK
-    female boolean NOT NULL,
-    date_of_birth date NOT NULL,
+    name varchar,
+    animal_id integer, -- FK
+    owner_id integer, -- FK
+    female boolean,
+    date_of_birth date,
     active boolean DEFAULT true
 );
 
 CREATE TABLE visits (
     id SERIAL PRIMARY KEY, -- PK
-    pet_id integer NOT NULL, -- FK
-    date date NOT NULL,
+    pet_id integer, -- FK
+    date date,
     weight integer,
     overnight_stay boolean,
     total_charge integer
@@ -38,40 +38,40 @@ CREATE TABLE visits (
 
 CREATE TABLE animals (
     id SERIAL PRIMARY KEY, -- PK
-    name varchar NOT NULL,
+    name varchar,
     active boolean DEFAULT true
 );
 
 CREATE TABLE medicines (
     id SERIAL PRIMARY KEY, -- PK
-    name varchar NOT NULL,
+    name varchar,
     description text,
     stock_amount integer,
-    method varchar NOT NULL,
-    unit varchar NOT NULL,
-    vaccine boolean NOT NULL
+    method varchar,
+    unit varchar,
+    vaccine boolean
 );
 
 CREATE TABLE medicine_costs (
     id SERIAL PRIMARY KEY, -- PK
-    medicine_id integer NOT NULL, -- FK
-    cost_per_unit integer NOT NULL,
+    medicine_id integer, -- FK
+    cost_per_unit integer,
     start_date date DEFAULT now()::date,
     end_date date
 );
 
 CREATE TABLE animal_medicines (
     id SERIAL PRIMARY KEY, -- PK
-    animal_id integer NOT NULL, -- FK
-    medicine_id integer NOT NULL, -- FK
+    animal_id integer, -- FK
+    medicine_id integer, -- FK
     recommended_num_of_units integer
 );
 
 CREATE TABLE visit_medicines (
     id SERIAL PRIMARY KEY, -- PK
-    visit_id integer NOT NULL, -- FK
-    medicine_id integer NOT NULL, -- FK
-    units_given integer NOT NULL,
+    visit_id integer, -- FK
+    medicine_id integer, -- FK
+    units_given integer,
     discount real DEFAULT 0
 );
 
@@ -93,28 +93,28 @@ CREATE TABLE treatments (
 
 CREATE TABLE procedure_costs (
     id SERIAL PRIMARY KEY, -- PK
-    procedure_id integer NOT NULL, -- FK
-    cost integer NOT NULL,
+    procedure_id integer, -- FK
+    cost integer,
     start_date date DEFAULT now()::date,
     end_date date
 );
 
 CREATE TABLE notes (
     id SERIAL PRIMARY KEY, -- PK
-    notable_type varchar NOT NULL, -- FK (polymorphic)
-    notable_id integer NOT NULL, -- FK (polymorphic)
-    title varchar NOT NULL,
-    content text NOT NULL,
-    user_id integer NOT NULL, -- FK
+    notable_type varchar, -- FK (polymorphic)
+    notable_id integer, -- FK (polymorphic)
+    title varchar,
+    content text,
+    user_id integer, -- FK
     date date DEFAULT now()::date
 );
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY, -- PK
-    first_name varchar NOT NULL,
-    last_name varchar NOT NULL,
-    role varchar NOT NULL,
-    username varchar NOT NULL,
-    password_digest varchar NOT NULL,
+    first_name varchar,
+    last_name varchar,
+    role varchar,
+    username varchar,
+    password_digest varchar,
     active boolean DEFAULT true
 );
