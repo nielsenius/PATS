@@ -100,3 +100,11 @@ $$ LANGUAGE plpgsql;
 -- verify_that_medicine_is_appropriate_for_pet
 -- (takes medicine_id and pet_id as arguments and returns a boolean)
 
+CREATE OR REPLACE FUNCTION verify_that_medicine_is_appropriate_for_pet(_medicine_id int, _pet_id int) RETURNS boolean AS $$
+    DECLARE
+        pet_animal_id int;
+    BEGIN
+        pet_animal_id = (SELECT animal_id FROM pets WHERE id = _pet_id);
+        RETURN (SELECT COUNT(*) FROM animal_medicines WHERE animal_id = pet_animal_id AND medicine_id = _medicine_id) = 1;
+    END;
+$$ LANGUAGE plpgsql;
