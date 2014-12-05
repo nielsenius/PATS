@@ -162,7 +162,7 @@ ALTER TABLE users
 
 ALTER TABLE users ADD UNIQUE (username);
 
-ALTER TABLE medicines ADD CONSTRAINT limit_methods CHECK (method = 'injection' OR method = 'oral' OR method = 'intravenous');
+ALTER TABLE medicines ADD CONSTRAINT limit_methods CHECK (method IN ('injection', 'oral', 'intravenous'));
 
 ALTER TABLE visit_medicines ADD CONSTRAINT med_discount_range CHECK (discount BETWEEN 0.00 AND 1.00);
 ALTER TABLE treatments ADD CONSTRAINT treatment_discount_range CHECK (discount BETWEEN 0.00 AND 1.00);

@@ -10,7 +10,7 @@ CREATE TABLE owners (
     last_name varchar,
     street varchar,
     city varchar,
-    state varchar,
+    state varchar DEFAULT 'PA',
     zip varchar,
     phone varchar,
     email varchar,

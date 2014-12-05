@@ -12,7 +12,30 @@
 -- calculate_overnight_stay
 -- (associated with a trigger: update_overnight_stay_flag)
 
+CREATE TRIGGER update_overnight_stay_flag
+AFTER INSERT ON treatments
+EXECUTE PROCEDURE calculate_overnight_stay();
 
+CREATE OR REPLACE FUNCTION calculate_overnight_stay() RETURNS TRIGGER AS $$
+    DECLARE
+        _treatment_id integer;
+        _procedure_id integer;
+        _visit_id integer;
+        total_time integer;
+    BEGIN
+        _treatment_id = (SELECT currval(pg_get_serial_sequence('treatments', 'id')));
+        _procedure_id = (SELECT procedure_id FROM treatments WHERE id = _treatment_id);
+        _visit_id = (SELECT visit_id FROM treatments WHERE id = _treatment_id);
+        
+        total_time = (SELECT SUM(length_of_time) FROM procedures WHERE id = _procedure_id);
+        
+        IF total_time > 720 THEN
+            UPDATE visits SET overnight_stay = true WHERE id = _visit_id;
+        END IF;
+        
+        RETURN NULL;
+    END;
+$$ LANGUAGE plpgsql;
 
 --TRIGGER TO automatically set the end_date of previous medicine_costs to the 
 --current date after a new record is added.
