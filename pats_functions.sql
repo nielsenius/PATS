@@ -133,8 +133,16 @@ CREATE OR REPLACE FUNCTION set_end_date_for_procedure_costs() RETURNS TRIGGER AS
 -- decrease_stock_amount_after_dosage
 -- (associated with a trigger: update_stock_amount_for_medicines)
 
+CREATE TRIGGER update_stock_amount_for_medicines
+AFTER INSERT ON visit_medicines
+EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
 
-
+CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
+    BEGIN
+        UPDATE medicines SET stock_amount = (stock_amount - NEW.units_given) WHERE id = NEW.medicine_id;
+        RETURN NULL;
+    END;
+$$ LANGUAGE plpgsql;
 
 -- verify_that_medicine_requested_in_stock
 -- (takes medicine_id and units_needed as arguments and returns a boolean)
