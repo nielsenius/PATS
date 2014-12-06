@@ -30,9 +30,9 @@ CREATE TABLE pets (
 CREATE TABLE visits (
     id SERIAL PRIMARY KEY, -- PK
     pet_id integer, -- FK
-    date date,
+    date date DEFAULT now()::date,
     weight integer,
-    overnight_stay boolean,
+    overnight_stay boolean DEFAULT false,
     total_charge integer DEFAULT 0
 );
 
