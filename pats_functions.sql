@@ -6,8 +6,36 @@
 -- calculate_total_costs
 -- (associated with two triggers: update_total_costs_for_medicines_changes & update_total_costs_for_treatments_changes)
 
+CREATE TRIGGER update_total_costs_for_medicines_changes
+AFTER INSERT OR UPDATE ON visit_medicines
+FOR EACH ROW
+EXECUTE PROCEDURE calculate_total_costs;
 
+CREATE TRIGGER update_total_costs_for_treatments_changes
+AFTER INSERT OR UPDATE ON treatments
+FOR EACH ROW
+EXECUTE PROCEDURE calculate_total_costs;
 
+CREATE OR REPLACE FUNCTION calculate_total_costs() RETURNS TRIGGER AS $$
+    DECLARE
+        r record;
+        total_cost integer;
+    BEGIN
+        total_cost = 0;
+        
+        FOR r IN SELECT * FROM visit_medicines WHERE visit_id = NEW.visit_id LOOP
+            total_cost = total_cost + ((SELECT cost_per_unit FROM medicine_costs WHERE medicine_costs.medicine_id = r.medicine_id) * r.units_given * (1 - r.discount));
+        END LOOP;
+        
+        FOR r IN SELECT * FROM treatments WHERE visit_id = NEW.visit_id LOOP
+            total_cost = total_cost + ((SELECT cost FROM procedure_costs WHERE procedure_costs.procedure_id = r.procedure_id) * (1 - r.discount));
+        END LOOP;
+        
+        UPDATE visits SET total_charge = total_cost WHERE id = NEW.visit_id;
+        
+        RETURN NULL;
+    END;
+$$ LANGUAGE plpgsql;
 
 -- calculate_overnight_stay
 -- (associated with a trigger: update_overnight_stay_flag)
@@ -39,13 +67,13 @@ $$ LANGUAGE plpgsql;
 
 --TRIGGER TO automatically set the end_date of previous medicine_costs to the 
 --current date after a new record is added.
-CREATE TRIGGER increment_created_count
+CREATE TRIGGER set_end_date_for_previous_medicine_cost
 AFTER INSERT ON medicine_costs
-EXECUTE PROCEDURE set_end_date_for_previous_medicine_cost();
+EXECUTE PROCEDURE set_end_date_for_medicine_costs();
 
 -- set_end_date_for_medicine_costs
 -- (associated with a trigger: set_end_date_for_previous_medicine_cost)
-CREATE OR REPLACE FUNCTION set_end_date_for_previous_medicine_cost() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION set_end_date_for_medicine_costs() RETURNS TRIGGER AS $$
 	--
 	DECLARE
 		--today's date (current_date)
@@ -72,13 +100,13 @@ CREATE OR REPLACE FUNCTION set_end_date_for_previous_medicine_cost() RETURNS TRI
 -- (associated with a trigger: set_end_date_for_previous_procedure_cost
 --to automatically set the end_date of either procedure_costs or 
 --procedure_costs to the current date before a new record is added.)
-CREATE TRIGGER increment_created_count
+CREATE TRIGGER set_end_date_for_previous_procedure_cost
 AFTER INSERT ON procedure_costs
-EXECUTE PROCEDURE set_end_date_for_previous_procedure_cost();
+EXECUTE PROCEDURE set_end_date_for_procedure_costs();
 
 -- set_end_date_for_procedure_costs
 -- (associated with a trigger: set_end_date_for_previous_procedure_cost)
-CREATE OR REPLACE FUNCTION set_end_date_for_previous_procedure_cost() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION set_end_date_for_procedure_costs() RETURNS TRIGGER AS $$
 	--
 	DECLARE
 		--today's date (current_date)

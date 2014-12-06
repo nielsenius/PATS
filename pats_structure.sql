@@ -33,7 +33,7 @@ CREATE TABLE visits (
     date date,
     weight integer,
     overnight_stay boolean,
-    total_charge integer
+    total_charge integer DEFAULT 0
 );
 
 CREATE TABLE animals (
