@@ -81,10 +81,10 @@ CREATE OR REPLACE FUNCTION set_end_date_for_medicine_costs() RETURNS TRIGGER AS 
         prev_mc_id INTEGER;
 	BEGIN
 		--get the recently added medicine_cost medicine_id
-		most_recent_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'medicine_id')));
-        prev_mc_id = most_recent_mc_id-1
+		most_recent_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'id')));
+        prev_mc_id = most_recent_mc_id-1;
 		--update previous medicine_cost's end_date to be today
-		UPDATE medicine_costs SET end_date = (current_date) WHERE medicine_id = prev_mc_id;
+		UPDATE medicine_costs SET end_date = (current_date) WHERE id = prev_mc_id;
 	  RETURN NULL;
 	END;
 	$$ LANGUAGE plpgsql;
@@ -102,14 +102,14 @@ EXECUTE PROCEDURE set_end_date_for_procedure_costs();
 CREATE OR REPLACE FUNCTION set_end_date_for_procedure_costs() RETURNS TRIGGER AS $$
     --
     DECLARE
-        most_recent_p_id INTEGER;
-        prev_p_id INTEGER;
+        most_recent_pc_id INTEGER;
+        prev_pc_id INTEGER;
     BEGIN
         --get the recently added procedure procedure_id
-        most_recent_p_id = (SELECT currval(pg_get_serial_sequence('procedures', 'procedure_id')));
-        prev_p_id = most_recent_p_id-1
+        most_recent_pc_id = (SELECT currval(pg_get_serial_sequence('procedure_costs', 'id')));
+        prev_pc_id = most_recent_pc_id-1;
         --update previous procedure's end_date to be today
-        UPDATE procedures SET end_date = (current_date) WHERE procedure_id = prev_p_id;
+        UPDATE procedure_costs SET end_date = (current_date) WHERE id = prev_pc_id;
       RETURN NULL;
     END;
     $$ LANGUAGE plpgsql;
@@ -128,14 +128,26 @@ EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
 CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
     --
     DECLARE
+        newest_vm_id INTEGER;
+        newest_vm_medicine_id INTEGER;
+        appropriate_medicine_id INTEGER;
+        m_stock_amount INTEGER;
+        vm_units_given INTEGER;      
+        
 
     BEGIN
-        --get the CURRENT currval
-        prev_medicine_id = (SELECT currval(pg_get_serial_sequence('medicines', 'medicine_id')));
-        --hold onto the currval for future use
-        get_medicine_id = prev_medicine_id
-        new_stock_amount = prev_stock_amount - units_given
-        UPDATE medicines SET stock_amount = (new_stock_amount) WHERE medicine_id = get_medicine_id
+        --get id of recently added visit_medicine_id
+        newest_vm_id = (SELECT currval(pg_get_serial_sequence('visit_medicines', 'id')));
+         --get associated medicine_id of recently added visit_medicine
+        newest_vm_medicine_id = (SELECT medicine_id FROM visit_medicines WHERE id = newest_vm_id);
+        --find the appropriate medicine to dock stock using id
+        appropriate_medicine_id = (SELECT id FROM medicines WHERE id = newest_vm_medicine_id);
+        --grab the medicine's stock_amount
+        m_stock_amount = (SELECT stock_amount from medicines WHERE id = appropriate_medicine_id);
+        --grab the visit_medicine's units_given
+        vm_units_given = (SELECT units_given from visit_medicines WHERE id = newest_vm_id);
+        --dock the stock of the medicine by the visit_medicine's units given
+        UPDATE medicines SET stock_amount = (m_stock_amount - vm_units_given) WHERE id = appropriate_medicine_id;
         
       RETURN NULL;
     END;
