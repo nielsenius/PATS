@@ -128,9 +128,12 @@ EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
 CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
     --
     DECLARE
-        appropriate_medicine_id INTEGER;
         newest_vm_id INTEGER;
         newest_vm_medicine_id INTEGER;
+        appropriate_medicine_id INTEGER;
+        m_stock_amount INTEGER;
+        vm_units_given INTEGER;      
+        
 
     BEGIN
         --get id of recently added visit_medicine_id
@@ -144,7 +147,7 @@ CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER 
         --grab the visit_medicine's units_given
         vm_units_given = (SELECT units_given from visit_medicines WHERE id = newest_vm_id);
         --dock the stock of the medicine by the visit_medicine's units given
-        UPDATE medicines SET stock_amount = (m_stock_amount - vm_units_given) WHERE id = appropriate_medicine_id
+        UPDATE medicines SET stock_amount = (m_stock_amount - vm_units_given) WHERE id = appropriate_medicine_id;
         
       RETURN NULL;
     END;
