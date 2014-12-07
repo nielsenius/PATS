@@ -4,6 +4,7 @@
 --
 --
 
+-- Matt's version
 BEGIN;
 INSERT INTO visits(pet_id, weight) VALUES (173, 39);
 INSERT INTO treatments(visit_id, procedure_id, successful) VALUES (SELECT currval(pg_get_serial_sequence('visits', 'id')), SELECT id FROM procedures WHERE name = "Examination", true);
@@ -27,6 +28,7 @@ COMMIT;
 -- then none of this data is saved to the system. Set up a transaction that will handle this 
 -- scenario successfully.
 
+-- Theo's version
 BEGIN;
 --need to verify sequence names
 --do i need to add savepoints?

@@ -125,6 +125,7 @@ CREATE TRIGGER update_stock_amount_for_medicines
 AFTER INSERT ON visit_medicines
 EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
 
+-- Theo's version
 CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
     --
     DECLARE
@@ -154,10 +155,8 @@ CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER 
     $$ LANGUAGE plpgsql;
     -- used $$ as delimiters b/c needed '' inside sequence eval
 
-CREATE TRIGGER update_stock_amount_for_medicines
-AFTER INSERT ON visit_medicines
-EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
 
+-- Matt's version
 CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
     BEGIN
         UPDATE medicines SET stock_amount = (stock_amount - NEW.units_given) WHERE id = NEW.medicine_id;
