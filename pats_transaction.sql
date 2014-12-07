@@ -20,13 +20,17 @@
 
 BEGIN;
 --need to verify sequence names
---calculate overnight_stay and total_charge
+--do i need to add savepoints?
+--need to calculate overnight_stay and total_charge
+--do the calculations happen automatically because they are set to be triggered?
 INSERT INTO visits (id, pet_id, date, weight)
 VALUES (nextval('visits_visit_id_seq'), 173, current_date, 39);
---do I need discount in the insert line below
+--discount defaults to 0 so no need to enter
 INSERT INTO visit_medicines (id, visit_id, medicine_id, units_given)
 VALUES (nextval('visit_medicines_visit_medicine_id_seq'), SELECT id from visits where pet_id = 173, 3, 500);
 INSERT INTO visit_medicines (id, visit_id, medicine_id, units_given)
 VALUES (nextval('visit_medicines_visit_medicine_id_seq'), SELECT id from visits where pet_id = 173, 5, 200);
+COMMIT;
+
 
 
