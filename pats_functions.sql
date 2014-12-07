@@ -80,7 +80,7 @@ CREATE OR REPLACE FUNCTION set_end_date_for_medicine_costs() RETURNS TRIGGER AS 
 		most_recent_mc_id INTEGER;
         prev_mc_id INTEGER;
 	BEGIN
-		--get the recently added medicine_cost medicine_id
+		--get the recently added medicine_costs medicine_id
 		most_recent_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'id')));
         prev_mc_id = most_recent_mc_id-1;
 		--update previous medicine_cost's end_date to be today
@@ -119,10 +119,10 @@ CREATE OR REPLACE FUNCTION set_end_date_for_procedure_costs() RETURNS TRIGGER AS
 
 -- decrease_stock_amount_after_dosage
 -- (associated with a trigger: update_stock_amount_for_medicines)
- --reduce the medicine stock levels after a new visit_medicine application is recorded in the system.
+ --reduce the medicine stock levels after a new visit_medicines application is recorded in the system.
 
 CREATE TRIGGER update_stock_amount_for_medicines
-AFTER INSERT ON visit_medicine
+AFTER INSERT ON visit_medicines
 EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
 
 CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
