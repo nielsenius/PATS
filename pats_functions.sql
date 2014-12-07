@@ -65,31 +65,26 @@ CREATE OR REPLACE FUNCTION calculate_overnight_stay() RETURNS TRIGGER AS $$
     END;
 $$ LANGUAGE plpgsql;
 
---TRIGGER TO automatically set the end_date of previous medicine_costs to the 
+--TRIGGER set_end_date_for_previous_medicine_cost
+--trigger to automatically set the end_date of previous medicine_costs to the 
 --current date after a new record is added.
 CREATE TRIGGER set_end_date_for_previous_medicine_cost
 AFTER INSERT ON medicine_costs
 EXECUTE PROCEDURE set_end_date_for_medicine_costs();
 
--- set_end_date_for_medicine_costs
+-- set_end_date_for_medicine_costs()
 -- (associated with a trigger: set_end_date_for_previous_medicine_cost)
 CREATE OR REPLACE FUNCTION set_end_date_for_medicine_costs() RETURNS TRIGGER AS $$
 	--
 	DECLARE
-		--today's date (current_date)
-		new_mc_end_date DATE;
-		--need ID for resetting
-		get_mc_id INTEGER;
-
+		most_recent_mc_id INTEGER;
+        prev_mc_id INTEGER;
 	BEGIN
-		--find the medicine cost table itself which will soon become obsolete
-		--is the name of the table "medicine_costs"?
-		--get the CURRENT currval
-		prev_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'medicine_id')));
-		--hold onto this currval for future use
-		get_mc_id = (SELECT medicine_id FROM medicine_costs WHERE medicine_id = prev_mc_id);
-		--update medicine_costs end_date to be today
-		UPDATE medicine_costs SET end_date = (current_date) WHERE medicine_id = get_mc_id;
+		--get the recently added medicine_costs medicine_id
+		most_recent_mc_id = (SELECT currval(pg_get_serial_sequence('medicine_costs', 'id')));
+        prev_mc_id = most_recent_mc_id-1;
+		--update previous medicine_cost's end_date to be today
+		UPDATE medicine_costs SET end_date = (current_date) WHERE id = prev_mc_id;
 	  RETURN NULL;
 	END;
 	$$ LANGUAGE plpgsql;
@@ -98,40 +93,66 @@ CREATE OR REPLACE FUNCTION set_end_date_for_medicine_costs() RETURNS TRIGGER AS 
 
 -- set_end_date_for_procedure_costs
 -- (associated with a trigger: set_end_date_for_previous_procedure_cost
---to automatically set the end_date of either procedure_costs or 
---procedure_costs to the current date before a new record is added.)
+--to automatically set the end_date of either procedure_costs to 
+--the current date before a new record is added.)
 CREATE TRIGGER set_end_date_for_previous_procedure_cost
 AFTER INSERT ON procedure_costs
 EXECUTE PROCEDURE set_end_date_for_procedure_costs();
 
--- set_end_date_for_procedure_costs
--- (associated with a trigger: set_end_date_for_previous_procedure_cost)
 CREATE OR REPLACE FUNCTION set_end_date_for_procedure_costs() RETURNS TRIGGER AS $$
-	--
-	DECLARE
-		--today's date (current_date)
-		new_pc_end_date DATE;
-		--need ID for resetting
-		get_pc_id INTEGER;
-
-	BEGIN
-		--find the procedure cost table itself which will soon become obsolete
-		--is the name of the table "procedure_costs"?
-		--get the CURRENT currval
-		prev_pc_id = (SELECT currval(pg_get_serial_sequence('procedure_costs', 'procedure_id')));
-		--hold onto this currval for future use
-		get_pc_id = (SELECT procedure_id FROM procedure_costs WHERE procedure_id = prev_pc_id);
-		--update procedure_costs end_date to be today
-		UPDATE procedure_costs SET end_date = (current_date) WHERE procedure_id = get_pc_id;
-	  RETURN NULL;
-	END;
-	$$ LANGUAGE plpgsql;
-	-- used $$ as delimiters b/c needed '' inside sequence eval
+    --
+    DECLARE
+        most_recent_pc_id INTEGER;
+        prev_pc_id INTEGER;
+    BEGIN
+        --get the recently added procedure procedure_id
+        most_recent_pc_id = (SELECT currval(pg_get_serial_sequence('procedure_costs', 'id')));
+        prev_pc_id = most_recent_pc_id-1;
+        --update previous procedure's end_date to be today
+        UPDATE procedure_costs SET end_date = (current_date) WHERE id = prev_pc_id;
+      RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+    -- used $$ as delimiters b/c needed '' inside sequence eval
 
 
 
 -- decrease_stock_amount_after_dosage
 -- (associated with a trigger: update_stock_amount_for_medicines)
+ --reduce the medicine stock levels after a new visit_medicines application is recorded in the system.
+
+CREATE TRIGGER update_stock_amount_for_medicines
+AFTER INSERT ON visit_medicines
+EXECUTE PROCEDURE decrease_stock_amount_after_dosage();
+
+CREATE OR REPLACE FUNCTION decrease_stock_amount_after_dosage() RETURNS TRIGGER AS $$
+    --
+    DECLARE
+        newest_vm_id INTEGER;
+        newest_vm_medicine_id INTEGER;
+        appropriate_medicine_id INTEGER;
+        m_stock_amount INTEGER;
+        vm_units_given INTEGER;      
+        
+
+    BEGIN
+        --get id of recently added visit_medicine_id
+        newest_vm_id = (SELECT currval(pg_get_serial_sequence('visit_medicines', 'id')));
+         --get associated medicine_id of recently added visit_medicine
+        newest_vm_medicine_id = (SELECT medicine_id FROM visit_medicines WHERE id = newest_vm_id);
+        --find the appropriate medicine to dock stock using id
+        appropriate_medicine_id = (SELECT id FROM medicines WHERE id = newest_vm_medicine_id);
+        --grab the medicine's stock_amount
+        m_stock_amount = (SELECT stock_amount from medicines WHERE id = appropriate_medicine_id);
+        --grab the visit_medicine's units_given
+        vm_units_given = (SELECT units_given from visit_medicines WHERE id = newest_vm_id);
+        --dock the stock of the medicine by the visit_medicine's units given
+        UPDATE medicines SET stock_amount = (m_stock_amount - vm_units_given) WHERE id = appropriate_medicine_id;
+        
+      RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+    -- used $$ as delimiters b/c needed '' inside sequence eval
 
 CREATE TRIGGER update_stock_amount_for_medicines
 AFTER INSERT ON visit_medicines
