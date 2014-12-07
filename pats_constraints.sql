@@ -34,13 +34,13 @@ ALTER TABLE animal_medicines
 ADD CONSTRAINT animal_id_am_fk FOREIGN KEY (animal_id)
     REFERENCES animals (id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE;
+    ON DELETE RESTRICT;
 
 ALTER TABLE animal_medicines
 ADD CONSTRAINT medicine_id_am_fk FOREIGN KEY (medicine_id)
     REFERENCES medicines (id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE;
+    ON DELETE RESTRICT;
 
 ALTER TABLE visit_medicines
 ADD CONSTRAINT visit_id_vm_fk FOREIGN KEY (visit_id)
@@ -160,6 +160,7 @@ ALTER TABLE users
     ALTER COLUMN password_digest SET NOT NULL,
     ALTER COLUMN active SET NOT NULL;
 
+-- declare users(username) to be unique, also creates an index on the field
 ALTER TABLE users ADD UNIQUE (username);
 
 ALTER TABLE medicines ADD CONSTRAINT limit_methods CHECK (method IN ('injection', 'oral', 'intravenous'));

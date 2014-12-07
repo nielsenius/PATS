@@ -22,3 +22,7 @@ CREATE INDEX pc_procedure_id_idx ON procedure_costs(procedure_id);
 CREATE INDEX notes_notable_type_idx ON notes(notable_type);
 CREATE INDEX notes_notable_id_idx ON notes(notable_id);
 CREATE INDEX notes_user_id_idx ON notes(user_id);
+
+-- indexes on medicine_costs and procedure_costs end_date to make finding current cost faster
+CREATE INDEX mc_end_date_idx ON medicine_costs(end_date);
+CREATE INDEX pc_end_date_idx ON procedure_costs(end_date);
