@@ -12,7 +12,7 @@ CREATE VIEW owners_view AS
         JOIN animals a ON a.id = p.animal_id;
 
 CREATE VIEW medicine_view AS
-SELECT m.id, m.name AS "medicine", m.description, m.stock_amount, m.method, m.unit, m.vaccine, mc.cost_per_unit AS "current cost", mc.start_date AS "date_changed", a.name AS "animal"
+SELECT m.id, m.name AS "medicine", m.description, m.stock_amount, m.method, m.unit, m.vaccine, mc.cost_per_unit AS "current cost", mc.start_date, a.name AS "animal", a.active
     FROM medicines m
         JOIN medicine_costs mc ON mc.medicine_id = m.id
         JOIN animal_medicines am ON am.medicine_id = m.id
